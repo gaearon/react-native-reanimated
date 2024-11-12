@@ -5,6 +5,7 @@
 #include <cxxabi.h>
 
 #include <atomic>
+#include <cassert>
 #include <iostream>
 #include <string>
 
