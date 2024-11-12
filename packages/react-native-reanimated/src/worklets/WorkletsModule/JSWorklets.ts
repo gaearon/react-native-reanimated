@@ -10,7 +10,7 @@ export function createJSWorkletsModule(): IWorkletsModule {
 class JSWorklets implements IWorkletsModule {
   makeShareableClone<T>(): ShareableRef<T> {
     throw new ReanimatedError(
-      'makeShareableClone should never be called in JSReanimated.'
+      'makeShareableClone should never be called in JSWorklets.'
     );
   }
 }

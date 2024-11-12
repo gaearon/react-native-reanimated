@@ -45,7 +45,6 @@ class NativeReanimatedModule implements IReanimatedModule {
   constructor() {
     this.#workletsModule = WorkletsModule;
     // These checks have to split since version checking depend on the execution order
-    this.#workletsModule = WorkletsModule;
     if (__DEV__) {
       assertSingleReanimatedInstance();
     }
