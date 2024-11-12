@@ -24,11 +24,9 @@
 
 #include <memory>
 #include <string>
-#include <vector>
-#ifdef RCT_NEW_ARCH_ENABLED
 #include <unordered_set>
 #include <utility>
-#endif // RCT_NEW_ARCH_ENABLED
+#include <vector>
 
 namespace reanimated {
 
@@ -74,7 +72,7 @@ class NativeReanimatedModule : public NativeReanimatedModuleSpec {
       const jsi::Value &shadowNodeWrapper,
 #else
       const jsi::Value &viewTag,
-#endif // RCT_NEW_ARCH_ENABLED
+#endif
       const jsi::Value &propName,
       const jsi::Value &callback) override;
 
@@ -134,13 +132,13 @@ class NativeReanimatedModule : public NativeReanimatedModuleSpec {
 
   void initializeFabric(const std::shared_ptr<UIManager> &uiManager);
 
-  void initializeLayoutAnimations();
+  void initializeLayoutAnimationsProxy();
 
   std::string obtainPropFromShadowNode(
       jsi::Runtime &rt,
       const std::string &propName,
       const ShadowNode::Shared &shadowNode);
-#endif // RCT_NEW_ARCH_ENABLED
+#endif
 
   jsi::Value registerSensor(
       jsi::Runtime &rt,
@@ -237,14 +235,14 @@ class NativeReanimatedModule : public NativeReanimatedModuleSpec {
   const ObtainPropFunction obtainPropFunction_;
   const ConfigurePropsFunction configurePropsPlatformFunction_;
   const UpdatePropsFunction updatePropsFunction_;
-#endif // RCT_NEW_ARCH_ENABLED
+#endif
 
   const KeyboardEventSubscribeFunction subscribeForKeyboardEventsFunction_;
   const KeyboardEventUnsubscribeFunction unsubscribeFromKeyboardEventsFunction_;
 
 #ifndef NDEBUG
   SingleInstanceChecker<NativeReanimatedModule> singleInstanceChecker_;
-#endif // NDEBUG
+#endif
 };
 
 } // namespace reanimated

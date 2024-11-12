@@ -27,6 +27,8 @@ on:
       - apps/macos-example/package.json
       - apps/macos-example/ios/**
       - apps/macos-example/macos/**
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -46,7 +48,7 @@ jobs:
 
       - name: Install Pods
         working-directory: ${{ env.WORKING_DIRECTORY }}/macos
-        run: bundle install && bundle exec pod install
+        run: bundle install && bundle exec pod update # There's some bug on the macOS runners for pod installation and this is the workaround.
 
       - name: Build app
         working-directory: ${{ env.WORKING_DIRECTORY }}

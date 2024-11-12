@@ -22,6 +22,7 @@
 #include <react/renderer/scheduler/Scheduler.h>
 #include <react/renderer/uimanager/UIManagerBinding.h>
 #include <react/renderer/uimanager/primitives.h>
+#include <react/utils/CoreFeatures.h>
 #endif // RCT_NEW_ARCH_ENABLED
 
 #include <functional>
@@ -33,7 +34,7 @@
 
 // Standard `__cplusplus` macro reference:
 // https://en.cppreference.com/w/cpp/preprocessor/replace#Predefined_macros
-#if REACT_NATIVE_MINOR_VERSION >= 75 || __cplusplus >= 20202L
+#if REACT_NATIVE_MINOR_VERSION >= 75 || __cplusplus >= 202002L
 // Implicit copy capture of `this` is deprecated in NDK27, which uses C++20.
 #define COPY_CAPTURE_WITH_THIS [ =, this ] // NOLINT (whitespace/braces)
 #else
@@ -41,14 +42,9 @@
 // explicitly disallows C++20 features, including the syntax above. Therefore we
 // fallback to the deprecated syntax here.
 #define COPY_CAPTURE_WITH_THIS [=] // NOLINT (whitespace/braces)
-#endif // REACT_NATIVE_MINOR_VERSION >= 75 || __cplusplus >= 20202L
+#endif // REACT_NATIVE_MINOR_VERSION >= 75 || __cplusplus >= 202002L
 
 using namespace facebook;
-
-#if REACT_NATIVE_MINOR_VERSION == 73 && defined(RCT_NEW_ARCH_ENABLED)
-// Android can't find the definition of this static field
-bool CoreFeatures::useNativeState;
-#endif
 
 namespace reanimated {
 
@@ -606,13 +602,8 @@ bool NativeReanimatedModule::handleRawEvent(
     eventType = "on" + eventType.substr(3);
   }
   jsi::Runtime &rt = uiWorkletRuntime_->getJSIRuntime();
-#if REACT_NATIVE_MINOR_VERSION >= 73
   const auto &eventPayload = rawEvent.eventPayload;
   jsi::Value payload = eventPayload->asJSIValue(rt);
-#else
-  const auto &payloadFactory = rawEvent.payloadFactory;
-  jsi::Value payload = payloadFactory(rt);
-#endif
 
   auto res = handleEvent(eventType, tag, std::move(payload), currentTime);
   // TODO: we should call performOperations conditionally if event is handled
@@ -841,15 +832,15 @@ void NativeReanimatedModule::initializeFabric(
     const std::shared_ptr<UIManager> &uiManager) {
   uiManager_ = uiManager;
 
-  initializeLayoutAnimations();
+  initializeLayoutAnimationsProxy();
 
   mountHook_ =
       std::make_shared<ReanimatedMountHook>(propsRegistry_, uiManager_);
-  commitHook_ =
-      std::make_shared<ReanimatedCommitHook>(propsRegistry_, uiManager_);
+  commitHook_ = std::make_shared<ReanimatedCommitHook>(
+      propsRegistry_, uiManager_, layoutAnimationsProxy_);
 }
 
-void NativeReanimatedModule::initializeLayoutAnimations() {
+void NativeReanimatedModule::initializeLayoutAnimationsProxy() {
   uiManager_->setAnimationDelegate(nullptr);
   auto scheduler = reinterpret_cast<Scheduler *>(uiManager_->getDelegate());
   auto componentDescriptorRegistry =
@@ -865,13 +856,9 @@ void NativeReanimatedModule::initializeLayoutAnimations() {
         scheduler->getContextContainer(),
         uiWorkletRuntime_->getJSIRuntime(),
         uiScheduler_);
-    uiManager_->getShadowTreeRegistry().enumerate(
-        [this](const ShadowTree &shadowTree, bool &stop) {
-          shadowTree.getMountingCoordinator()->setMountingOverrideDelegate(
-              layoutAnimationsProxy_);
-        });
   }
 }
+
 #endif // RCT_NEW_ARCH_ENABLED
 
 jsi::Value NativeReanimatedModule::subscribeForKeyboardEvents(
